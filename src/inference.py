@@ -84,12 +84,12 @@ def evaluate_model(model, X_test, y_test, loss_type="cross_entropy"):
     }
 
 
-def main():
+def main(args=None):
     """
     Main inference function.
     Returns dictionary with logits, loss, accuracy, f1, precision, recall.
     """
-    args = parse_arguments()
+    args = parse_arguments(args)
 
     # Override args from config file if provided
     if args.config is not None:
