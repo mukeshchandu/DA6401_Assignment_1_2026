@@ -46,7 +46,7 @@ def parse_arguments():
     # 4. Logging and Saving
     parser.add_argument("-w_p","--wandb_project", type=str, default="da6401-assignment-1", help="Weights & Biases project name")
     parser.add_argument("--wandb_entity", type=str, default=None, help="Weights & Biases entity (username)")
-    parser.add_argument("--model_save_path", type=str, default="./best_model.npy", help="Relative path to save the best model")
+    parser.add_argument("--model_save_path", type=str, default="best_model.npy", help="Relative path to save the best model")
 
     return parser.parse_args()
 
