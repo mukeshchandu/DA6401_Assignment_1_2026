@@ -8,7 +8,7 @@ import wandb
 import json
 from utils.data_loader import load as load_data
 from ann.neural_network import NeuralNetwork
-def parse_arguments():
+def parse_arguments(args=None):
     """
     Parse command-line arguments.
     
@@ -48,14 +48,14 @@ def parse_arguments():
     parser.add_argument("--wandb_entity", type=str, default=None, help="Weights & Biases entity (username)")
     parser.add_argument("--model_save_path", type=str, default="best_model.npy", help="Relative path to save the best model")
 
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
-def main():
+def main(args=None):
     """
     Main training function.
     """
-    args = parse_arguments()
+    args = parse_arguments(args)
     print(f"--- Starting Training Run ---")
     print(f"Dataset: {args.dataset}")
     print(f"Architecture: {args.num_layers} hidden layers of sizes {args.hidden_size}")
