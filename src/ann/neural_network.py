@@ -89,6 +89,7 @@ class NeuralNetwork:
         """
         Train the network for specified epochs.
         """
+        n_neurons_to_log = min(5, self.layers[0].W.shape[1])
         iteration=0
         nosamps=X_train.shape[0]
         batchloss=0
@@ -105,7 +106,7 @@ class NeuralNetwork:
                 self.backward(y_new[j:j+batch_size],y_pred)
                 self.optimizer.step(self.layers)
                 if iteration < 50:
-                    for neuron_idx in range(5):
+                    for neuron_idx in range(n_neurons_to_log):
                         g = float(np.linalg.norm(self.layers[0].grad_W[:, neuron_idx]))
                         wandb.log({f"neuron{neuron_idx}_grad": g, "iteration": iteration})
                 iteration += 1
