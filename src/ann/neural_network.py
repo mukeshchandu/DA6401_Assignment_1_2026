@@ -32,21 +32,39 @@ class NeuralNetwork:
 
         Args:
             cli_args: Command-line arguments (or Namespace) for configuring the network.
+                      Supports attribute names: hidden_size, activation, weight_init,
+                      optimizer, learning_rate, weight_decay, loss.
         """
         self.cli = cli_args
 
         in_size = 784
         out_size = 10
-        layers_tot = [in_size] + list(cli_args.hidden_size) + [out_size]
 
+        # Support both 'hidden_size' (list/tuple) and fallbacks
+        hidden_size = getattr(cli_args, 'hidden_size', None)
+        if hidden_size is None:
+            # fallback: build uniform hidden layers from num_layers + hidden_size as int
+            num_layers = getattr(cli_args, 'num_layers', 2)
+            sz = getattr(cli_args, 'sz', 64)
+            hidden_size = [sz] * num_layers
+        hidden_size = list(hidden_size)
+
+        activation   = getattr(cli_args, 'activation',    'relu')
+        weight_init  = getattr(cli_args, 'weight_init',   'xavier')
+        optimizer    = getattr(cli_args, 'optimizer',     'sgd')
+        learning_rate= getattr(cli_args, 'learning_rate', 0.01)
+        weight_decay = getattr(cli_args, 'weight_decay',  0.0)
+        loss_type    = getattr(cli_args, 'loss',          'cross_entropy')
+
+        layers_tot = [in_size] + hidden_size + [out_size]
         self.layers = []
         for i in range(len(layers_tot) - 1):
-            activation = cli_args.activation if i < len(layers_tot) - 2 else "linear"
-            layer = Neurallayer(layers_tot[i], layers_tot[i + 1], activation, cli_args.weight_init)
+            act = activation if i < len(layers_tot) - 2 else "linear"
+            layer = Neurallayer(layers_tot[i], layers_tot[i + 1], act, weight_init)
             self.layers.append(layer)
 
-        self.optimizer = Optimizer(cli_args.optimizer, cli_args.learning_rate, cli_args.weight_decay)
-        self.loss_fn = Lossfunc(cli_args.loss)
+        self.optimizer = Optimizer(optimizer, learning_rate, weight_decay)
+        self.loss_fn = Lossfunc(loss_type)
         self.grad_W = None
         self.grad_b = None
 
@@ -178,7 +196,8 @@ class NeuralNetwork:
             # Save best model based on validation F1
             if val_f1 > best_val_f1:
                 best_val_f1 = val_f1
-                self.save_weights(self.cli.model_save_path)
+                save_path = getattr(self.cli, 'model_save_path', 'best_model.npy')
+                self.save_weights(save_path)
                 print(f"  → New best model saved (val F1: {val_f1:.4f})")
 
             # Dead neuron fraction per hidden layer
