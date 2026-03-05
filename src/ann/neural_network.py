@@ -92,16 +92,22 @@ class NeuralNetwork:
             y_pred: Predicted logits
 
         Returns:
-            grad_W, grad_b - object arrays where index 0 = last (output) layer.
+            grad_W, grad_b - object arrays in FORWARD order:
+            grad_W[0] = input layer gradient, grad_W[-1] = output layer gradient.
         """
         da = self.loss_fn.backward(y_true, y_pred)
         gradw = []
         gradb = []
 
+        # Backprop in reverse order (output to input)
         for layer in self.layers[-1::-1]:
             da = layer.backward(da)
             gradw.append(layer.grad_W)
             gradb.append(layer.grad_b)
+
+        # Reverse to return in forward order (input to output)
+        gradw = gradw[::-1]
+        gradb = gradb[::-1]
 
         self.grad_W = np.empty(len(gradw), dtype=object)
         self.grad_b = np.empty(len(gradb), dtype=object)
