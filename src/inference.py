@@ -110,6 +110,56 @@ def main():
     _, _, _, _, X_test, y_test = load_data(args.dataset)
     print(f"Test samples: {X_test.shape[0]}")
 
+    # Load weights and reconstruct architecture from saved weight keys
+    # e.g. keys W0..W3 for a 3-hidden-layer model → hidden_size inferred from shapes
+    weights = load_model(args.model_save_path)
+    num_weight_layers = sum(1 for k in weights if k.startswith("W"))  # includes output layer
+    # W0:(784,h0), W1:(h0,h1), ..., W_{n-1}:(h_{n-2}, 10)
+    # hidden layers = all but the last weight matrix
+    inferred_hidden = [weights[f"W{i}"].shape[1] for i in range(num_weight_layers - 1)]
+    if inferred_hidden:
+        args.hidden_size = inferred_hidden
+        print(f"Architecture inferred from weights: hidden_size={args.hidden_size}")
+
+    model = NeuralNetwork(args)
+    model.set_weights(weights)
+
+    # Evaluate
+    results = evaluate_model(model, X_test, y_test, loss_type=args.loss)
+
+    print("\n--- Evaluation Results ---")
+    print(f"Loss      : {results['loss']:.4f}")
+    print(f"Accuracy  : {results['accuracy']:.2f}%")
+    print(f"Precision : {results['precision']:.4f}")
+    print(f"Recall    : {results['recall']:.4f}")
+    print(f"F1 Score  : {results['f1']:.4f}")
+    print("Evaluation complete!")
+
+    return results
+
+
+if __name__ == '__main__':
+    main()    Returns dictionary with logits, loss, accuracy, f1, precision, recall.
+    """
+    args = parse_arguments()
+
+    # Override args from config file if provided
+    if args.config is not None:
+        with open(args.config, "r") as f:
+            config = json.load(f)
+        args.hidden_size = config.get("hidden_size", args.hidden_size)
+        args.activation = config.get("activation", args.activation)
+        args.loss = config.get("loss", args.loss)
+        args.weight_init = config.get("weight_init", args.weight_init)
+        args.optimizer = config.get("optimizer", args.optimizer)
+        args.learning_rate = config.get("learning_rate", args.learning_rate)
+        args.weight_decay = config.get("weight_decay", args.weight_decay)
+        print(f"Architecture loaded from config: {args.config}")
+
+    # Load test data
+    _, _, _, _, X_test, y_test = load_data(args.dataset)
+    print(f"Test samples: {X_test.shape[0]}")
+
     # Load weights and build model  ← FIX: was passing args into load_model()
     weights = load_model(args.model_save_path)
     model = NeuralNetwork(args)
