@@ -48,31 +48,9 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def load_model(model_path,args=None):
-    """
-    Load trained model from disk.
-    """
-    if args is None:
-        try:
-            with open("best_config.json") as f:
-                cfg=json.load(f)
-        except FileNotFoundError:
-            cfg={}
-    args = argparse.Namespace(
-            hidden_size=cfg.get("hidden_size", [128, 128, 128]),
-            activation=cfg.get("activation", "relu"),
-            weight_init=cfg.get("weight_init", "xavier"),
-            optimizer=cfg.get("optimizer", "rmsprop"),
-            learning_rate=cfg.get("learning_rate", 0.001),
-            weight_decay=cfg.get("weight_decay", 0.0),
-            loss=cfg.get("loss", "cross_entropy"),
-            model_save_path=model_path,
-        )
-    model=NeuralNetwork(args)
-    model.set_weights(np.load(model_path,allow_pickle=True).item())
-    return model
-
-
+def load_model(model_path):
+    data = np.load(model_path, allow_pickle=True).item()
+    return data 
 def evaluate_model(model, X_test, y_test,loss_type="cross_entropy"): 
     """
     Evaluate model on test data.
