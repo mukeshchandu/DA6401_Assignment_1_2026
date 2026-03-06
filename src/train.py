@@ -1,3 +1,4 @@
+
 """
 Main Training Script
 Entry point for training neural networks with command-line arguments
@@ -8,7 +9,7 @@ import json
 from utils.data_loader import load as load_data
 from ann.neural_network import NeuralNetwork
 
-def parse_arguments(args):
+def parse_arguments():
     """
     Parse command-line arguments.
 
@@ -32,14 +33,14 @@ def parse_arguments(args):
     parser.add_argument("-w_p","--wandb_project",type=str,default="da6401-assignment-1",help="Weights & Biases project name")
     parser.add_argument("--wandb_entity",type=str,default=None,help="Weights & Biases entity (username)")
     parser.add_argument("--model_save_path",type=str,default="best_model.npy",help="Relative path to save the best model")
-    return parser.parse_args(args)
+    return parser.parse_args()
 
 
-def main(args):
+def main():
     """
     Main training function.
     """
-    args=parse_arguments(args)
+    args=parse_arguments()
     print(f"--- Starting Training Run ---")
     print(f"Dataset: {args.dataset}")
     print(f"Architecture: {args.num_layers} hidden layers of sizes {args.hidden_size}")
