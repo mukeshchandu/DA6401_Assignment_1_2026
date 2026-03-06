@@ -1,3 +1,4 @@
+
 """
 Inference Script
 Evaluate trained models on test sets
@@ -10,7 +11,7 @@ from utils.data_loader import load as load_data
 from ann.neural_network import NeuralNetwork
 from ann.objective_functions import loss as Lossfunc
 
-def parse_arguments(args=None):
+def parse_arguments(args):
     """
     Parse command-line arguments for inference.
 
@@ -61,7 +62,7 @@ def evaluate_model(model,X_test,y_test,loss_type="cross_entropy"):
     return {"logits":logits,"loss":loss_val,"accuracy":acc,"precision":precision,"recall":recall,"f1":f1}
 
 
-def main(args=None):
+def main(args):
     """
     Main inference function.
     Returns Dictionary - logits, loss, accuracy, f1, precision, recall
