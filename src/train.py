@@ -8,7 +8,7 @@ import json
 from utils.data_loader import load as load_data
 from ann.neural_network import NeuralNetwork
 
-def parse_arguments(args=None):
+def parse_arguments(args):
     """
     Parse command-line arguments.
 
@@ -35,7 +35,7 @@ def parse_arguments(args=None):
     return parser.parse_args(args)
 
 
-def main(args=None):
+def main(args):
     """
     Main training function.
     """
