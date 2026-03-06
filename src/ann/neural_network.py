@@ -1,12 +1,3 @@
-"""
-Main Neural Network Model class
-Handles forward and backward propagation loops
-"""
-try:
-    import wandb
-    _wandb_on=True
-except:
-    _wandb_on=False
 from ann.neural_layer import Neurallayer
 from ann.optimizers import Optimizer
 from ann.objective_functions import loss as Lossfunc
@@ -14,8 +5,8 @@ import numpy as np
 from sklearn.metrics import f1_score
 
 def _log(d):
-    if _wandb_on and wandb.run is not None:
-        wandb.log(d)
+    # if _wandb_on and wandb.run is not None:
+    wandb.log(d)
 
 class NeuralNetwork:
     """
@@ -31,14 +22,14 @@ class NeuralNetwork:
         self.cli=cli_args
         in_size=784
         out_size=10
-        hidden=list(getattr(cli_args,'hidden_size',[64,64]))
+        hidden=list(getattr(cli_args,'hidden_size'))
         layers_tot=[in_size]+hidden+[out_size]
-        act=getattr(cli_args,'activation','relu')
-        winit=getattr(cli_args,'weight_init','xavier')
-        opt=getattr(cli_args,'optimizer','sgd')
-        lr=getattr(cli_args,'learning_rate',0.01)
-        wd=getattr(cli_args,'weight_decay',0.0)
-        losstype=getattr(cli_args,'loss','cross_entropy')
+        act=getattr(cli_args,'activation')
+        winit=getattr(cli_args,'weight_init')
+        opt=getattr(cli_args,'optimizer')
+        lr=getattr(cli_args,'learning_rate')
+        wd=getattr(cli_args,'weight_decay')
+        losstype=getattr(cli_args,'loss')
         self.layers=[]
         for i in range(len(layers_tot)-1):
             present_layer=Neurallayer(layers_tot[i],layers_tot[i+1],act if i<len(layers_tot)-2 else "linear",winit)
@@ -82,8 +73,8 @@ class NeuralNetwork:
             gradw.append(layer.grad_W)
             gradb.append(layer.grad_b)
         # reverse so index 0 = input layer (forward order)
-        gradw=gradw[::-1]
-        gradb=gradb[::-1]
+        # gradw=gradw[::-1]
+        # gradb=gradb[::-1]
         self.grad_W,self.grad_b=np.empty(len(gradw),dtype=object),np.empty(len(gradb),dtype=object)
         for i,(w,b) in enumerate(zip(gradw,gradb)):
             self.grad_W[i]=w
