@@ -18,9 +18,8 @@ class Neurallayer:
         self.a_prev=None
         self.grad_W=None
         self.grad_b=None
-        # Buffers for optimizers (Momentum, Adam, etc.)
-        self.v_W, self.v_b = np.zeros_like(self.W), np.zeros_like(self.b)
-        self.m_W, self.m_b = np.zeros_like(self.W), np.zeros_like(self.b)
+        self.v_W,self.v_b = np.zeros_like(self.W), np.zeros_like(self.b)
+        self.m_W,self.m_b = np.zeros_like(self.W), np.zeros_like(self.b)
     def forward(self,a_prev):
         self.a_prev=a_prev
         self.z=a_prev@self.W+self.b
