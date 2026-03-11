@@ -1,6 +1,9 @@
 """
 Main Neural Network Model class
 Handles forward and backward propagation loops
+""""""
+Main Neural Network Model class
+Handles forward and backward propagation loops
 """
 import wandb
 from ann.neural_layer import Neurallayer
@@ -9,18 +12,8 @@ from ann.objective_functions import loss as Lossfunc
 import numpy as np
 from sklearn.metrics import f1_score
 class NeuralNetwork:
-    """
-    Main model class that orchestrates the neural network training and inference.
-    """
-    
     def __init__(self, cli_args):
         self.cli=cli_args
-        """
-        Initialize the neural network.
-
-        Args:
-            cli_args: Command-line arguments for configuring the network
-        """
         in_size=784
         out_size=10
         layers_tot=[in_size]+list(cli_args.hidden_size)+[out_size]
@@ -32,32 +25,27 @@ class NeuralNetwork:
         self.loss_fn=Lossfunc(cli_args.loss)
         self.grad_W=None
         self.grad_b=None
+    def _to_onehot(self,y):
+        y=np.asarray(y)
+        if y.ndim==2 and y.shape[1]>1:
+            return y.astype(np.float64)
+        n_classes=self.layers[-1].out_dim
+        flat=y.astype(int).flatten()
+        oh=np.zeros((flat.shape[0],n_classes),dtype=np.float64)
+        oh[np.arange(flat.shape[0]),flat]=1.0
+        return oh
     def forward(self, X):
-        """
-        Forward propagation through all layers.
-        
-        Args:
-            X: Input data
-            
-        Returns:
-            Output logits
-        """
+        X=np.asarray(X,dtype=np.float64)
+        if X.ndim==3:
+            X=X.reshape(X.shape[0],-1)
+        if X.max()>1.0:
+            X=X/255.0
         out=X
         for layer in self.layers:
             out=layer.forward(out)
         return out
-    
     def backward(self, y_true, y_pred):
-        """
-        Backward propagation to compute gradients.
-        
-        Args:
-            y_true: True labels
-            y_pred: Predicted outputs
-            
-        Returns:
-            return grad_w, grad_b
-        """
+        y_true=self._to_onehot(y_true)
         da=self.loss_fn.backward(y_true,y_pred)
         gradw=[]
         gradb=[]
@@ -77,6 +65,8 @@ class NeuralNetwork:
             d[f"b{i}"] = layer.b.copy()
         return d
     def set_weights(self, weight_dict):
+        if isinstance(weight_dict,np.ndarray) and weight_dict.shape==():
+            weight_dict=weight_dict.item()
         for i, layer in enumerate(self.layers):
             w_key = f"W{i}"
             b_key = f"b{i}"
@@ -85,9 +75,7 @@ class NeuralNetwork:
             if b_key in weight_dict:
                 layer.b = weight_dict[b_key].copy()
     def evaluate(self, X, y):
-        """
-        Evaluate the network on given data.
-        """
+        y=self._to_onehot(y)
         preds = self.forward(X)
         loss = self.loss_fn.forward(y, preds)
         acc = np.mean(np.argmax(preds, axis=1) == np.argmax(y, axis=1)) * 100
@@ -95,10 +83,11 @@ class NeuralNetwork:
     def save_weights(self, filepath):
         np.save(filepath,self.get_weights())
     def load_weights(self, filepath):
-        """Load weights from a .npy file saved by save_weights()."""
         weights_dict = np.load(filepath, allow_pickle=True).item()
         self.set_weights(weights_dict)
     def train(self, X_train, y_train, X_val, y_val, epochs, batch_size=32):
+        y_train=self._to_onehot(y_train)
+        y_val=self._to_onehot(y_val)
         n_log = min(5, self.layers[0].W.shape[1])
         iteration, nosamps, best_f1 = 0, X_train.shape[0], 0
         for i in range(epochs):
